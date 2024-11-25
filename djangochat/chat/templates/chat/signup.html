@@ -1,0 +1,50 @@
+{% extends 'chat/base.html' %}
+
+{% block title %}Sign up | {% endblock %}
+
+{% block content %}
+<div class="p-10 lg:p-20 text-center bg-pink-100">
+    <h1 class="text-3xl lg:text-6xl font-bold text-pink-800">Регистрация</h1>
+</div>
+
+<form method="post" action="." class="lg:w-1/3 px-4 py-8 mx-auto bg-white rounded-xl shadow-lg mt-10">
+    {% csrf_token %}
+
+    <div class="mb-6">
+        <label class="block text-pink-700 font-semibold">Логин</label>
+        <input type="text" name="username"
+               class="w-full mt-2 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+               placeholder="Введите логин">
+    </div>
+
+    <div class="mb-6">
+        <label class="block text-pink-700 font-semibold">Пароль</label>
+        <input type="password" name="password1"
+               class="w-full mt-2 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+               placeholder="Введите пароль">
+    </div>
+
+    <div class="mb-6">
+        <label class="block text-pink-700 font-semibold">Подтвердите пароль</label>
+        <input type="password" name="password2"
+               class="w-full mt-2 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+               placeholder="Подтвердите пароль">
+    </div>
+
+    {% if form.errors %}
+        <div class="mb-5 p-4 rounded-lg bg-red-100 text-red-600">
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <p>{{ error|escape }}</p>
+                {% endfor %}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <button
+        class="w-full px-5 py-3 rounded-lg text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 font-semibold"
+    >
+        Зарегистрироваться
+    </button>
+</form>
+{% endblock %}

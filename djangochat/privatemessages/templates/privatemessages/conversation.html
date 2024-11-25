@@ -1,0 +1,87 @@
+{% extends 'chat/base.html' %}
+{% block title %}Чат с {{ recipient.username }} {% endblock %}
+{% block content %}
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        #chat-log {
+            height: 400px;
+            overflow-y: auto;
+            background-color: #fdf2f8; /* Светлый розовый */
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #fbcfe8; /* Бледно-розовая рамка */
+        }
+        #chat-message-input {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid #fbcfe8;
+            padding: 10px;
+        }
+        #chat-message-submit {
+            background-color: #f43f5e; /* Яркий розовый */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #chat-message-submit:hover {
+            background-color: #e11d48; /* Темный розовый */
+        }
+    </style>
+</head>
+<body class="bg-pink-100">
+
+<div class="container mx-auto py-8 px-4">
+    <h2 class="text-2xl font-bold text-pink-800 text-center mb-6">Чат с {{ recipient.username }}</h2>
+
+    <div id="chat-log" class="mb-4">
+        {% for message in messages %}
+        <div class="mb-2">
+            <strong class="text-pink-600">{{ message.sender.username }}:</strong>
+            <span class="text-gray-800">{{ message.content }}</span>
+        </div>
+        {% endfor %}
+    </div>
+
+    <textarea id="chat-message-input" rows="2" placeholder="Введите сообщение..."></textarea>
+    <button id="chat-message-submit" class="mt-4">Отправить</button>
+</div>
+
+<script>
+    const userId = "{{ recipient.id }}";
+    const currentUser = "{{ request.user.username }}";
+
+    const chatSocket = new WebSocket(
+        'ws://' + window.location.host + '/ws/direct/' + userId + '/'
+    );
+
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        const chatLog = document.getElementById('chat-log');
+
+        const messageElement = document.createElement('div');
+        messageElement.innerHTML = `<strong class="text-pink-600">${data.sender}:</strong> <span class="text-gray-800">${data.message}</span>`;
+        chatLog.appendChild(messageElement);
+        chatLog.scrollTop = chatLog.scrollHeight;
+    };
+
+    chatSocket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+
+    document.getElementById('chat-message-submit').onclick = function(e) {
+        const messageInput = document.getElementById('chat-message-input');
+        const message = messageInput.value;
+        chatSocket.send(JSON.stringify({
+            'message': message,
+            'recipient_id': userId,
+        }));
+        messageInput.value = '';
+    };
+</script>
+
+</body>
+{% endblock %}
